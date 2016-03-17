@@ -1,0 +1,12 @@
+{
+	"name":              "cli-autocomplete",
+	"description":       "A command line prompt with autocompletion.",
+	"version":           "0.1.0",
+	"main":              "index.js",
+	"files":             ["index.js"],
+	"keywords":          ["command", "line", "cli", "prompt", "autocomplete", "completion", "prompt"],
+	"author":            "Jannis R <mail@jannisr.de>",
+	"homepage":          "https://github.com/derhuerst/cli-autocomplete",
+	"repository":        "git://github.com/derhuerst/cli-autocomplete.git",
+	"license":           "ISC"
+}
