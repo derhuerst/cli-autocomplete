@@ -1,9 +1,9 @@
 'use strict'
 
-const chalk =   require('chalk')
-const figures = require('figures')
-const output =  require('log-update')
-const escapes = require('ansi-escapes')
+const chalk =     require('chalk')
+const figures =   require('figures')
+const escapes =   require('ansi-escapes')
+const stripAnsi = require('strip-ansi')
 
 
 
@@ -30,14 +30,26 @@ const defaults = {
 
 
 
-const render = function (ctx) {
-	// todo: `output` appends a line break :/
-	output(escapes.eraseLine + (!ctx.done ? escapes.cursorShow : '') + [
+const renderPrompt = (ctx) =>
+	escapes.eraseLine
+	+ (!ctx.done ? escapes.cursorShow : '')
+	+ [
 		ctx._.symbol(ctx),
 		ctx._.text,
 		ctx._.delimiter,
 		ctx._.replace(ctx.input)
-	].join(' '))
+	].join(' ')
+
+const render = function (ctx) {
+	let lines = [renderPrompt(ctx)]
+		.concat(ctx.suggestions
+			.map((suggestion) => chalk.yellow(suggestion)))
+
+	let linesRendered = lines.length
+	let lengthOfFistLine = stripAnsi(lines[0]).length
+	process.stdout.write(lines.join('\n')
+		+ escapes.cursorTo(0)
+		+ escapes.cursorMove(lengthOfFistLine, -linesRendered + 1))
 }
 
 
@@ -73,7 +85,6 @@ const abort = function (ctx) {
 	ctx.aborted = ctx.done = true
 	render(ctx)
 
-	output.done()
 	process.stdout.write(escapes.cursorHide)
 	ctx.reject(null)
 }
@@ -83,13 +94,12 @@ const submit = function (ctx) {
 	ctx.done = true
 	render(ctx)
 
-	output.done()
 	process.stdout.write(escapes.cursorHide)
 	ctx.resolve(ctx.input)
 }
 
 const remove = function (ctx) {
-	if (ctx.input.length === 0) output(escapes.beep)
+	if (ctx.input.length === 0) process.stdout.write(escapes.beep)
 	ctx.input = ctx.input.slice(0, -1)
 	ctx.suggestions = ctx._.suggest(ctx.input)
 	render(ctx)
