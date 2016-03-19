@@ -30,35 +30,37 @@ const defaults = {
 
 
 
-const renderPrompt = (ctx) => escapes.eraseLine
-	+ [
-		ctx._.symbol(ctx), ctx._.text, ctx._.delimiter,
-		ctx._.replace(ctx.input)
-	].join(' ')
+const renderPrompt = (ctx) => [
+	ctx._.symbol(ctx), ctx._.text, ctx._.delimiter,
+	ctx._.replace(ctx.input)
+].join(' ')
 
 var linesRendered = 0
 
-const clear = (ctx) => process.stdout.write(
-	escapes.cursorTo(0)
-	+ escapes.cursorMove(0, linesRendered - 1)
-	+ escapes.eraseLines(linesRendered)
-	+ escapes.cursorMove(0, -linesRendered + 1)
-)
+const clearPrompt = (ctx) =>
+	// cursor is at the end of the first rendered line
+	(linesRendered > 0 ? escapes.cursorDown(linesRendered) : '') // move to last rendered line
+	+ escapes.eraseLines(linesRendered + 1) // move to first rendered line, deleting everything
 
-var linesRendered = 0
+const renderSuggestion = (ctx) => (s, i) => i === ctx.cursor ? chalk.cyan(s) : s
+
 const render = function (ctx) {
-	clear()
+	process.stdout.write(clearPrompt())
 
-	if (ctx.done) return process.stdout.write(renderPrompt(ctx) + '\n')
+	if (ctx.done) {
+		process.stdout.write(renderPrompt(ctx) + '\n')
+		linesRendered = 2
+	} else {
+		let lines = [renderPrompt(ctx)]
+			.concat(ctx.suggestions.map(renderSuggestion(ctx)))
+		linesRendered = lines.length
 
-	let lines = [renderPrompt(ctx)].concat(ctx.suggestions
-		.map((s, i) => i === ctx.cursor ? chalk.cyan(s) : s))
-	linesRendered = lines.length
-	let lengthOfFistLine = stripAnsi(lines[0]).length
-
-	process.stdout.write(lines.join('\n')
-		+ escapes.cursorTo(0)
-		+ escapes.cursorMove(lengthOfFistLine, -linesRendered + 1))
+		process.stdout.write(
+			lines.join('\n')
+			+ (lines.length > 1 ? escapes.cursorUp(lines.length - 1) : '')
+			+ escapes.cursorTo(stripAnsi(lines[0]).length)
+		)
+	}
 }
 
 
@@ -123,7 +125,7 @@ const submit = function (ctx) {
 	ctx.done = true
 	render(ctx)
 
-	ctx.resolve(ctx.suggestions[ctx.cursor])
+	ctx.resolve(ctx.suggestions[ctx.cursor] || '')
 }
 
 const remove = function (ctx) {
@@ -152,7 +154,6 @@ const prompt = function (text, opt) {
 	process.stdin.on('data', onKey(ctx))
 	// todo: on 'end'
 	onInput(ctx, ctx.input)
-	render(ctx)
 
 	return new Promise(function (resolve, reject) {
 		ctx.resolve = resolve
