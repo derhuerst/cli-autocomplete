@@ -42,7 +42,7 @@ const clearPrompt = (ctx) =>
 	(linesRendered > 0 ? escapes.cursorDown(linesRendered) : '') // move to last rendered line
 	+ escapes.eraseLines(linesRendered + 1) // move to first rendered line, deleting everything
 
-const renderSuggestion = (ctx) => (s, i) => i === ctx.cursor ? chalk.cyan(s) : s
+const renderSuggestion = (ctx) => (s, i) => i === ctx.cursor ? chalk.cyan(s.title) : s.title
 
 const render = function (ctx) {
 	process.stdout.write(clearPrompt())
@@ -125,7 +125,9 @@ const submit = function (ctx) {
 	ctx.done = true
 	render(ctx)
 
-	ctx.resolve(ctx.suggestions[ctx.cursor] || '')
+	if (ctx.cursor in ctx.suggestions)
+		ctx.resolve(ctx.suggestions[ctx.cursor].value)
+	else ctx.resolve(null)
 }
 
 const remove = function (ctx) {
