@@ -32,7 +32,9 @@ const defaults = {
 
 const renderPrompt = (ctx) => [
 	ctx._.symbol(ctx), ctx._.text, ctx._.delimiter,
-	ctx._.replace(ctx.input)
+	(ctx.done && ctx.cursor in ctx.suggestions
+		? ctx.suggestions[ctx.cursor].title
+		: ctx._.replace(ctx.input))
 ].join(' ')
 
 var linesRendered = 0
