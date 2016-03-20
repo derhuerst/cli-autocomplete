@@ -3,7 +3,7 @@
 	"description":       "A command line prompt with autocompletion.",
 	"version":           "0.1.0",
 	"main":              "index.js",
-	"files":             ["index.js"],
+	"files":             ["index.js", "ui.js"],
 	"keywords":          ["command", "line", "cli", "prompt", "autocomplete", "completion", "prompt"],
 	"author":            "Jannis R <mail@jannisr.de>",
 	"homepage":          "https://github.com/derhuerst/cli-autocomplete",

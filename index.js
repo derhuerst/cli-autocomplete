@@ -1,53 +1,33 @@
 'use strict'
 
 const chalk =     require('chalk')
-const figures =   require('figures')
 const escapes =   require('ansi-escapes')
 const stripAnsi = require('strip-ansi')
 
-
-
-
-const styles = {
-	default:   (input) => input,
-	password:  (input) => '*'.repeat(input.length),
-	invisible: (input) => ''
-}
-
-const symbols = {
-	aborted: chalk.red(figures.cross),
-	done:    chalk.green(figures.tick),
-	default: chalk.cyan('?')
-}
-
-const defaults = {
-	symbol:    (ctx) => ctx.aborted ? symbols.aborted : (ctx.done ? symbols.done : symbols.default),
-	text:      '',
-	delimiter: chalk.gray('>'),
-	replace:   styles.default,
-	suggest:   (input) => []
-}
+const ui =        require('./ui')
 
 
 
 const renderPrompt = (ctx) => [
-	ctx._.symbol(ctx), ctx._.text, ctx._.delimiter,
+	ui.symbol(ctx.done, ctx.aborted),
+	ctx._.text,
+	ui.delimiter,
 	(ctx.done && ctx.cursor in ctx.suggestions
 		? ctx.suggestions[ctx.cursor].title
-		: ctx._.replace(ctx.input))
+		: ctx.render(ctx.input))
 ].join(' ')
 
 var linesRendered = 0
 
-const clearPrompt = (ctx) =>
-	// cursor is at the end of the first rendered line
+const clear = (ctx) => // cursor is at the end of the first rendered line
 	(linesRendered > 0 ? escapes.cursorDown(linesRendered) : '') // move to last rendered line
 	+ escapes.eraseLines(linesRendered + 1) // move to first rendered line, deleting everything
 
-const renderSuggestion = (ctx) => (s, i) => i === ctx.cursor ? chalk.cyan(s.title) : s.title
+const renderSuggestion = (ctx) =>
+	(s, i) => i === ctx.cursor ? chalk.cyan(s.title) : s.title
 
 const render = function (ctx) {
-	process.stdout.write(clearPrompt())
+	process.stdout.write(clear())
 
 	if (ctx.done) {
 		process.stdout.write(renderPrompt(ctx) + '\n')
@@ -141,17 +121,25 @@ const remove = function (ctx) {
 
 
 
+const defaults = {
+	type:    'default',
+	text:    '',
+	suggest: (input) => []
+}
+
 const prompt = function (text, opt) {
 	if ('string' !== typeof text) throw new Error('text must be a string.')
 	if (arguments.length < 2 || 'object' !== typeof opt) opt = {}
 	opt = Object.assign({}, defaults, opt, {text})
+
 	let ctx = {
 		_:           opt,
 		done:        false,
 		aborted:     false,
 		input:       '',
 		suggestions: [],
-		cursor:      0
+		cursor:      0,
+		render:      ui.render(opt.type)
 	}
 
 	process.stdin.setRawMode(true)
@@ -167,4 +155,4 @@ const prompt = function (text, opt) {
 
 
 
-module.exports = Object.assign(prompt, {styles, symbols, defaults})
+module.exports = Object.assign(prompt, {defaults})
