@@ -1,10 +1,9 @@
 'use strict'
 
+const ui =        require('cli-styles')
 const chalk =     require('chalk')
 const escapes =   require('ansi-escapes')
 const stripAnsi = require('strip-ansi')
-
-const ui =        require('./ui')
 
 
 

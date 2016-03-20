@@ -10,6 +10,7 @@
 	"repository":        "git://github.com/derhuerst/cli-autocomplete.git",
 	"license":           "ISC",
 	"dependencies": {
+		"cli-styles":    "^0.1",
 		"chalk":         "^1.1.1",
 		"figures":       "^1.4",
 		"ansi-escapes":  "^1.3",
