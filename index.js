@@ -4,6 +4,7 @@ const ui =        require('cli-styles')
 const chalk =     require('chalk')
 const escapes =   require('ansi-escapes')
 const stripAnsi = require('strip-ansi')
+const keypress =  require('keypress')
 
 
 
@@ -49,30 +50,27 @@ const Prompt = {
 
 
 
-	, onKey: function (input, enc) {
-		input = input.toString(enc)
-		let key = input.charAt(input.length - 1)
-		// see https://en.wikipedia.org/wiki/GNU_Readline#Keyboard_shortcuts
-		let code = input.charCodeAt(0)
-
-		if(/\x1b\[+[A-Z]/.test(input)) {
-			     if (key === 'A') this.up()
-			else if (key === 'B') this.down()
-			return
+	, onKey: function (raw, key) {
+		if (!key) key = {
+			name:     raw.toLowerCase(),
+			sequence: raw,
+			ctrl: false, meta: false, shift: false
 		}
 
-		     // if (code === 1)    first(); // ctrl + A
-		     if (code === 3)    this.abort()  // ctrl + C
-		else if (code === 13)   this.submit() // return key
-		else if (code === 127)  this.delete() // backspace
-		// else if (code === 4)    process.exit(); // ctrl + D
-		// else if (code === 5)    last(); // ctrl + E
-		// else if (code === 7)    reset(); // ctrl + G
-		// else if (code === 9)    right(); // ctrl + I / tab
-		// else if (code === 10)   submit(); // ctrl + J
-		// else if (code === 27)   abort(); // escape
-		else {
-			this.input += input
+		if (key.ctrl) {
+			if (key.name === 'a')     return this.first()
+			if (key.name === 'c')     return this.abort()
+			if (key.name === 'd')     return this.abort()
+			if (key.name === 'e')     return this.last()
+		}
+		if (key.name === 'return')    return this.submit()
+		if (key.name === 'backspace') return this.delete()
+		if (key.name === 'abort')     return this.abort()
+		if (key.name === 'up')        return this.up()
+		if (key.name === 'down')      return this.down()
+
+		if (key.ctrl === false && key.meta === false && key.shift === false) {
+			this.input += key.sequence
 			this.suggestions = this.suggest(this.input)
 			this.render()
 		}
@@ -138,8 +136,10 @@ const prompt = function (text, opt) {
 	if ('string' === typeof opt.type) instance.transform = ui.render(opt.type)
 	if ('function' === typeof opt.suggest) instance.suggest = opt.suggest
 
+	keypress(process.stdin)
 	process.stdin.setRawMode(true)
-	process.stdin.on('data', instance.onKey.bind(instance))
+	process.stdin.resume()
+	process.stdin.on('keypress', instance.onKey.bind(instance))
 	// todo: on 'end'
 	instance.suggestions = instance.suggest(instance.input)
 	instance.render()
