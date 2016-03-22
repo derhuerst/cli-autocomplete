@@ -136,4 +136,4 @@ const prompt = function (text, opt) {
 
 
 
-module.exports = Object.assign(prompt, Prompt)
+module.exports = Object.assign(prompt, {Prompt})

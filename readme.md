@@ -4,6 +4,7 @@
 
 [![asciicast](https://asciinema.org/a/39918.png)](https://asciinema.org/a/39918)
 
+[![npm version](https://img.shields.io/npm/v/cli-autocomplete.svg)](https://www.npmjs.com/package/cli-autocomplete)
 [![build status](https://img.shields.io/travis/derhuerst/cli-autocomplete.svg)](https://travis-ci.org/derhuerst/cli-autocomplete)
 [![dependency status](https://img.shields.io/david/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=dependencies)
 [![dev dependency status](https://img.shields.io/david/dev/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=devDependencies)
