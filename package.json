@@ -9,6 +9,7 @@
 	"homepage":          "https://github.com/derhuerst/cli-autocomplete",
 	"repository":        "git://github.com/derhuerst/cli-autocomplete.git",
 	"license":           "ISC",
+	"engines":           {"node": ">=4"},
 	"dependencies": {
 		"cli-styles":    "^0.3",
 		"chalk":         "^1.1.1",

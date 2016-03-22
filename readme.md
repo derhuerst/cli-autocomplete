@@ -8,6 +8,8 @@
 [![dependency status](https://img.shields.io/david/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=dependencies)
 [![dev dependency status](https://img.shields.io/david/dev/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=devDependencies)
 
+*cli-autocomplete* uses [*cli-styles*](https://github.com/derhuerst/cli-styles) to have a look & feel consistent with other prompts.
+
 
 ## Installing
 
