@@ -50,30 +50,10 @@ const Prompt = {
 
 
 
-	, onKey: function (raw, key) {
-		if (!key) key = {
-			name:     raw.toLowerCase(),
-			sequence: raw,
-			ctrl: false, meta: false, shift: false
-		}
-
-		if (key.ctrl) {
-			if (key.name === 'a')     return this.first()
-			if (key.name === 'c')     return this.abort()
-			if (key.name === 'd')     return this.abort()
-			if (key.name === 'e')     return this.last()
-		}
-		if (key.name === 'return')    return this.submit()
-		if (key.name === 'backspace') return this.delete()
-		if (key.name === 'abort')     return this.abort()
-		if (key.name === 'up')        return this.up()
-		if (key.name === 'down')      return this.down()
-
-		if (key.ctrl === false && key.meta === false && key.shift === false) {
-			this.input += key.sequence
-			this.suggestions = this.suggest(this.input)
-			this.render()
-		}
+	, onKey: function (key) {
+		this.input += key
+		this.suggestions = this.suggest(this.input)
+		this.render()
 	}
 
 	, up: function () {
@@ -139,7 +119,11 @@ const prompt = function (text, opt) {
 	keypress(process.stdin)
 	process.stdin.setRawMode(true)
 	process.stdin.resume()
-	process.stdin.on('keypress', instance.onKey.bind(instance))
+	process.stdin.on('keypress', function (raw, key) {
+		let type = ui.keypress(raw, key)
+		if (instance[type]) instance[type]()
+		else instance.onKey(type)
+	})
 	// todo: on 'end'
 	instance.suggestions = instance.suggest(instance.input)
 	instance.render()
