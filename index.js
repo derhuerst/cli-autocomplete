@@ -68,16 +68,16 @@ const Prompt = {
 	}
 
 	, abort: function () {
-		process.stdin.destroy()
 		this.aborted = this.done = true
 		this.render()
+		this.close()
 		this.reject(null)
 	}
 
 	, submit: function () {
-		process.stdin.destroy()
 		this.done = true
 		this.render()
+		this.close()
 
 		if (this.cursor in this.suggestions)
 			this.resolve(this.suggestions[this.cursor].value)
@@ -116,15 +116,22 @@ const prompt = function (text, opt) {
 	if ('string' === typeof opt.type) instance.transform = ui.render(opt.type)
 	if ('function' === typeof opt.suggest) instance.suggest = opt.suggest
 
-	keypress(process.stdin)
-	process.stdin.setRawMode(true)
-	process.stdin.resume()
-	process.stdin.on('keypress', function (raw, key) {
+	const onKeypress = function (raw, key) {
 		let type = ui.keypress(raw, key)
 		if (instance[type]) instance[type]()
 		else instance.onKey(type)
-	})
-	// todo: on 'end'
+	}
+	keypress(process.stdin)
+	process.stdin.on('keypress', onKeypress)
+
+	const oldRawMode = process.stdin.isRaw
+	process.stdin.setRawMode(true)
+	process.stdin.on('end', () => instance.close())
+	instance.close = () => {
+		process.stdin.removeListener('keypress', onKeypress)
+		process.stdin.setRawMode(oldRawMode)
+	}
+
 	instance.suggestions = instance.suggest(instance.input)
 	instance.render()
 
