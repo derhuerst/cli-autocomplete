@@ -10,7 +10,7 @@
 [![dev dependency status](https://img.shields.io/david/dev/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=devDependencies)
 ![ISC-licensed](https://img.shields.io/github/license/derhuerst/cli-autocomplete.svg)
 
-*cli-autocomplete* uses [*cli-styles*](https://github.com/derhuerst/cli-styles) to have a look & feel consistent with other prompts.
+*cli-autocomplete* uses [*cli-styles*](https://github.com/derhuerst/cli-styles) and [*prompt-skeleton*](https://github.com/derhuerst/prompt-skeleton) to have a look & feel consistent with [other prompts](https://github.com/derhuerst/prompt-skeleton#prompts-using-prompt-skeleton).
 
 
 ## Installing
@@ -23,7 +23,7 @@ npm install cli-autocomplete
 ## Usage
 
 ```js
-const prompt = require('cli-autocomplete')
+const autocompletePrompt = require('cli-autocomplete')
 
 const colors = [
 	{title: 'red',    value: '#f00'},
@@ -33,12 +33,13 @@ const colors = [
 	{title: 'black',  value: '#000'},
 	{title: 'white',  value: '#fff'}
 ]
+const suggestColors = (input) => colors
+	.filter((color) => color.title.slice(0, input.length) === input)
 
-prompt('What is your favorite color?', {
-	suggest: (input) => colors
-		.filter((c) => c.title.slice(0, input.length) === input)
-})
-.then(console.log)
+autocompletePrompt('What is your favorite color?', suggestColors)
+.on('data', (e) => console.log('Interim value', e.value))
+.on('abort', (v) => console.log('Aborted with', v))
+.on('submit', (v) => console.log('Submitted with', v))
 ```
 
 
