@@ -1,6 +1,6 @@
 # cli-autocomplete
 
-**A command line prompt with autocompletion** that is simple and lightweight. It provides just the ui, you are responsible for relevant completions.
+**A command line prompt with autocompletion.** It provides just the ui, you are responsible for relevant completions.
 
 [![asciicast](https://asciinema.org/a/39918.png)](https://asciinema.org/a/39918)
 
@@ -8,6 +8,7 @@
 [![build status](https://img.shields.io/travis/derhuerst/cli-autocomplete.svg)](https://travis-ci.org/derhuerst/cli-autocomplete)
 [![dependency status](https://img.shields.io/david/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=dependencies)
 [![dev dependency status](https://img.shields.io/david/dev/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=devDependencies)
+![ISC-licensed](https://img.shields.io/github/license/derhuerst/cli-autocomplete.svg)
 
 *cli-autocomplete* uses [*cli-styles*](https://github.com/derhuerst/cli-styles) to have a look & feel consistent with other prompts.
 
@@ -39,7 +40,6 @@ prompt('What is your favorite color?', {
 })
 .then(console.log)
 ```
-
 
 
 ## Contributing
