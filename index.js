@@ -1,146 +1,166 @@
 'use strict'
 
-const ui =        require('cli-styles')
-const chalk =     require('chalk')
-const escapes =   require('ansi-escapes')
-const stripAnsi = require('strip-ansi')
-const keypress =  require('keypress')
+const ui =    require('cli-styles')
+const esc =   require('ansi-escapes')
+const chalk = require('chalk')
+const strip = require('strip-ansi')
+const wrap =  require('prompt-skeleton')
 
 
 
-const Prompt = {
+const AutocompletePrompt = {
 
-	renderPrompt: function () { return [
-		ui.symbol(this.done, this.aborted), this.text, ui.delimiter,
-		this.done && this.cursor in this.suggestions
-			? this.suggestions[this.cursor].title
-			: this.transform(this.input)
-	].join(' ') }
-
-	, renderSuggestion: (cursor) =>
-		(s, i) => i === cursor ? chalk.cyan(s.title) : s.title
-
-	, linesRendered: 0
-
-	, clear: function () { return ''
-		// move to last rendered line
-		+ (this.linesRendered > 0 ? escapes.cursorDown(this.linesRendered) : '')
-		// move to first rendered line, deleting everything
-		+ escapes.eraseLines(this.linesRendered + 1)
+	  moveCursor: function (i) {
+	  	this.cursor = i
+	  	if (this.suggestions.length > 0) this.value = this.suggestions[i].value
+	  	else this.value = null
+	  	this.emit()
 	}
 
-	, render: function () {
-		process.stdout.write(this.clear())
-
-		if (this.done) {
-			process.stdout.write(this.renderPrompt() + '\n')
-			this.linesRendered = 2
-		} else {
-			let lines = [this.renderPrompt()]
-				.concat(this.suggestions.map(this.renderSuggestion(this.cursor)))
-			this.linesRendered = lines.length
-
-			process.stdout.write(
-				lines.join('\n')
-				+ (lines.length > 1 ? escapes.cursorUp(lines.length - 1) : '')
-				+ escapes.cursorTo(stripAnsi(lines[0]).length))
-				// cursor is at the end of the first rendered line now
-		}
+	, setInput: function (input) {
+	  	this.input = input
+		this.suggestions = this.suggest(input)
+		const l = Math.max(this.suggestions.length - 1, 0)
+		this.moveCursor(Math.min(l, this.cursor))
 	}
 
-
-
-	, onKey: function (key) {
-		this.input += key
-		this.suggestions = this.suggest(this.input)
-		this.render()
-	}
-
-	, up: function () {
-		if (this.cursor === 0) this.cursor = this.suggestions.length - 1
-		else this.cursor--
-		this.render()
-	}
-
-	, down: function () {
-		this.cursor = ++this.cursor % this.suggestions.length
-		this.render()
+	, reset: function () {
+	  	this.setInput('')
+	  	this.moveCursor(0)
+	  	this.render()
 	}
 
 	, abort: function () {
-		this.aborted = this.done = true
+		this.done = this.aborted = true
+		this.emit()
 		this.render()
+		this.out.write('\n')
 		this.close()
-		this.reject(null)
 	}
 
 	, submit: function () {
 		this.done = true
+		this.aborted = false
+		this.emit()
 		this.render()
+		this.out.write('\n')
 		this.close()
-
-		if (this.cursor in this.suggestions)
-			this.resolve(this.suggestions[this.cursor].value)
-		else this.resolve(null)
 	}
 
-	, delete: function () {
-		if (this.input.length === 0)
-			return process.stdout.write(escapes.beep)
 
-		this.input = this.input.slice(0, -1)
-		this.suggestions = this.suggest(this.input)
+
+	, _: function (c) {
+	  	this.setInput(this.input + c)
+		this.render()
+	}
+	, delete: function () {
+		if (this.input.length === 0) return this.bell()
+	  	this.setInput(this.input.slice(0, -1))
 		this.render()
 	}
 
 
 
-	, transform: ui.render()
-	, suggest:   () => []
-	, done:      false
-	, aborted:   false
-	, input:     ''
-	, cursor:    0
-	, resolve:   () => null
-	, reject:    () => null
-
-}
-
-const prompt = function (text, opt) {
-	let instance = Object.create(Prompt)
-
-	if ('string' !== typeof text) throw new Error('text must be a string.')
-	instance.text = text
-
-	if (arguments.length < 2 || 'object' !== typeof opt) opt = {}
-	if ('string' === typeof opt.type) instance.transform = ui.render(opt.type)
-	if ('function' === typeof opt.suggest) instance.suggest = opt.suggest
-
-	const onKeypress = function (raw, key) {
-		let type = ui.keypress(raw, key)
-		if (instance[type]) instance[type]()
-		else instance.onKey(type)
+	, first: function () {
+	  	this.moveCursor(0)
+		this.render()
 	}
-	keypress(process.stdin)
-	process.stdin.on('keypress', onKeypress)
-
-	const oldRawMode = process.stdin.isRaw
-	process.stdin.setRawMode(true)
-	process.stdin.on('end', () => instance.close())
-	instance.close = () => {
-		process.stdin.removeListener('keypress', onKeypress)
-		process.stdin.setRawMode(oldRawMode)
+	, last: function () {
+	  	this.moveCursor(this.suggestions.length - 1)
+		this.render()
 	}
 
-	instance.suggestions = instance.suggest(instance.input)
-	instance.render()
+	, up: function () {
+		if (this.cursor <= 0) return this.bell()
+	  	this.moveCursor(this.cursor - 1)
+		this.render()
+	}
+	, down: function () {
+		if (this.cursor >= (this.suggestions.length - 1)) return this.bell()
+	  	this.moveCursor(this.cursor + 1)
+		this.render()
+	}
+	, next: function () {
+		this.moveCursor((this.cursor + 1) % this.suggestions.length)
+		this.render()
+	}
 
-	return new Promise(function (resolve, reject) {
-		instance.resolve = resolve
-		instance.reject =  reject
-	})
+
+
+	, linesRendered: 0
+	, clear: function () {
+		const r = this.linesRendered
+		this.out.write(
+			// move to last rendered line
+			  (r > 0 ? esc.cursorDown(r) : '')
+			// move to first rendered line, deleting everything
+			+ esc.eraseLines(r + 1)
+		)
+	}
+
+	, renderPrompt: function () {return [
+		ui.symbol(this.done, this.aborted), this.msg, ui.delimiter,
+		this.done && (this.cursor in this.suggestions)
+			? this.suggestions[this.cursor].title
+			: this.transform(this.input)
+	].join(' ')}
+
+	, renderSuggestion: function (s, i) {
+		return i === this.cursor ? chalk.cyan(s.title) : s.title
+	}
+
+	, render: function (first) {
+		if (!first) this.clear()
+
+		const prompt = this.renderPrompt()
+		if (this.done) {
+			this.out.write(prompt)
+			this.linesRendered = 1
+		} else {
+			let out = [prompt].concat(this.suggestions
+				.map(this.renderSuggestion.bind(this)))
+			this.linesRendered = out.length
+
+			this.out.write(out.join('\n')
+				// move cursor back to first line
+				+ (out.length > 1 ? esc.cursorUp(out.length - 1) : '')
+				// move cursor to the end of the line
+				+ esc.cursorTo(strip(out[0]).length))
+		}
+	}
 }
 
 
 
-module.exports = Object.assign(prompt, {Prompt})
+const defaults = {
+	  input:       ''
+	, transform:   ui.render()
+
+	, suggestions: []
+	, cursor:      0
+	, value:       null
+
+	, done:        false
+	, aborted:     false
+}
+
+const autocompletePrompt = (msg, suggest, opt) => {
+	if ('string' !== typeof msg)
+		throw new Error('Message must be a string.')
+	if ('function' !== typeof suggest)
+		throw new Error('Suggest must be a function.')
+	if (!Array.isArray(suggest('')))
+		throw new Error('Suggest must return an array.')
+	if (Array.isArray(opt) || 'object' !== typeof opt) opt = {}
+
+	let p = Object.assign(Object.create(AutocompletePrompt), defaults, opt)
+	p.msg          = msg
+	p.suggest      = suggest
+	p.suggestions  = p.suggest(p.input)
+
+	return wrap(p)
+}
+
+
+
+module.exports = Object.assign(autocompletePrompt, {AutocompletePrompt})
