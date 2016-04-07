@@ -156,7 +156,13 @@ const autocompletePrompt = (msg, suggest, opt) => {
 	let p = Object.assign(Object.create(AutocompletePrompt), defaults, opt)
 	p.msg          = msg
 	p.suggest      = suggest
+
 	p.suggestions  = p.suggest(p.input)
+	if (p.suggestions.length === 0) p.cursor = 0
+	else {
+		p.cursor = Math.min(p.suggestions.length - 1, p.cursor)
+		p.value = p.suggestions[p.cursor].value
+	}
 
 	return wrap(p)
 }
