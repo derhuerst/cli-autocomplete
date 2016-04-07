@@ -2,7 +2,7 @@
 
 **A command line prompt with autocompletion.** It provides just the ui, you are responsible for relevant completions.
 
-[![asciicast](https://asciinema.org/a/39918.png)](https://asciinema.org/a/39918)
+[![asciicast](https://asciinema.org/a/41575.png)](https://asciinema.org/a/41575)
 
 [![npm version](https://img.shields.io/npm/v/cli-autocomplete.svg)](https://www.npmjs.com/package/cli-autocomplete)
 [![build status](https://img.shields.io/travis/derhuerst/cli-autocomplete.svg)](https://travis-ci.org/derhuerst/cli-autocomplete)
