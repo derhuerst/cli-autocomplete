@@ -19,9 +19,11 @@ const AutocompletePrompt = {
 
 	, complete: function (cb) {
 		const self = this
+		this.completing = true
 	  	this.suggest(this.input)
 	  	.then((suggestions) => {
 	  		self.suggestions = suggestions
+			this.completing = false
 			const l = Math.max(suggestions.length - 1, 0)
 			self.moveCursor(Math.min(l, self.cursor))
 			if (cb) cb()
@@ -115,7 +117,8 @@ const AutocompletePrompt = {
 	}
 
 	, renderPrompt: function () {return [
-		ui.symbol(this.done, this.aborted), this.msg, ui.delimiter,
+		ui.symbol(this.done, this.aborted), this.msg,
+		ui.delimiter(this.completing),
 		this.done && (this.cursor in this.suggestions)
 			? this.suggestions[this.cursor].title
 			: this.transform(this.input)
@@ -153,6 +156,7 @@ const defaults = {
 	, transform:   ui.render()
 
 	, suggestions: []
+	, completing:  false
 	, cursor:      0
 	, value:       null
 
