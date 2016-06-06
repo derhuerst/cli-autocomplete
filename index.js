@@ -1,5 +1,6 @@
 'use strict'
 
+const so = require('so')
 const ui =    require('cli-styles')
 const esc =   require('ansi-escapes')
 const chalk = require('chalk')
@@ -11,24 +12,24 @@ const wrap =  require('prompt-skeleton')
 const AutocompletePrompt = {
 
 	  moveCursor: function (i) {
-	  	this.cursor = i
-	  	if (this.suggestions.length > 0) this.value = this.suggestions[i].value
-	  	else this.value = null
-	  	this.emit()
+		this.cursor = i
+		if (this.suggestions.length > 0) this.value = this.suggestions[i].value
+		else this.value = null
+		this.emit()
 	}
 
-	, setInput: function (input) {
+	, setInput: so(function* (input) {
 	  	this.input = input
-		this.suggestions = this.suggest(input)
+	  	this.suggestions = yield this.suggest(input)
 		const l = Math.max(this.suggestions.length - 1, 0)
 		this.moveCursor(Math.min(l, this.cursor))
-	}
+	})
 
-	, reset: function () {
-	  	this.setInput('')
+	, reset: so(function* () {
+	  	yield this.setInput('')
 	  	this.moveCursor(0)
 	  	this.render()
-	}
+	})
 
 	, abort: function () {
 		this.done = this.aborted = true
@@ -49,15 +50,15 @@ const AutocompletePrompt = {
 
 
 
-	, _: function (c) {
-	  	this.setInput(this.input + c)
+	, _: so(function* (c) {
+	  	yield this.setInput(this.input + c)
 		this.render()
-	}
-	, delete: function () {
+	})
+	, delete: so(function* () {
 		if (this.input.length === 0) return this.bell()
-	  	this.setInput(this.input.slice(0, -1))
+	  	yield this.setInput(this.input.slice(0, -1))
 		this.render()
-	}
+	})
 
 
 
@@ -149,20 +150,17 @@ const autocompletePrompt = (msg, suggest, opt) => {
 		throw new Error('Message must be a string.')
 	if ('function' !== typeof suggest)
 		throw new Error('Suggest must be a function.')
-	if (!Array.isArray(suggest('')))
-		throw new Error('Suggest must return an array.')
 	if (Array.isArray(opt) || 'object' !== typeof opt) opt = {}
 
 	let p = Object.assign(Object.create(AutocompletePrompt), defaults, opt)
 	p.msg          = msg
 	p.suggest      = suggest
-
-	p.suggestions  = p.suggest(p.input)
 	if (p.suggestions.length === 0) p.cursor = 0
 	else {
 		p.cursor = Math.min(p.suggestions.length - 1, p.cursor)
 		p.value = p.suggestions[p.cursor].value
 	}
+	p.setInput('').then(() => p.render())
 
 	return wrap(p)
 }

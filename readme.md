@@ -33,8 +33,8 @@ const colors = [
 	{title: 'black',  value: '#000'},
 	{title: 'white',  value: '#fff'}
 ]
-const suggestColors = (input) => colors
-	.filter((color) => color.title.slice(0, input.length) === input)
+const suggestColors = (input) => Promise.resolve(colors
+	.filter((color) => color.title.slice(0, input.length) === input))
 
 autocompletePrompt('What is your favorite color?', suggestColors)
 .on('data', (e) => console.log('Interim value', e.value))
