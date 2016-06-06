@@ -19,15 +19,15 @@ const AutocompletePrompt = {
 
 	, complete: function (cb) {
 		const self = this
-		this.completing = true
-	  	this.suggest(this.input)
-	  	.then((suggestions) => {
+	  	const p = this.completing = this.suggest(this.input)
+	  	p.then((suggestions) => {
+	  		if (this.completing !== p) return
 	  		self.suggestions = suggestions
 			this.completing = false
 			const l = Math.max(suggestions.length - 1, 0)
 			self.moveCursor(Math.min(l, self.cursor))
 			if (cb) cb()
-	  	}).catch(console.error)
+	  	})
 	}
 
 	, reset: function () {
@@ -156,7 +156,7 @@ const defaults = {
 	, transform:   ui.render()
 
 	, suggestions: []
-	, completing:  false
+	, completing:  null
 	, cursor:      0
 	, value:       null
 
