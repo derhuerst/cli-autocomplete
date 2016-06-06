@@ -1,6 +1,5 @@
 'use strict'
 
-const so = require('so')
 const ui =    require('cli-styles')
 const esc =   require('ansi-escapes')
 const chalk = require('chalk')
@@ -18,18 +17,26 @@ const AutocompletePrompt = {
 		this.emit()
 	}
 
-	, setInput: so(function* (input) {
-	  	this.input = input
-	  	this.suggestions = yield this.suggest(input)
-		const l = Math.max(this.suggestions.length - 1, 0)
-		this.moveCursor(Math.min(l, this.cursor))
-	})
+	, complete: function (cb) {
+		const self = this
+	  	this.suggest(this.input)
+	  	.then((suggestions) => {
+	  		self.suggestions = suggestions
+			const l = Math.max(suggestions.length - 1, 0)
+			self.moveCursor(Math.min(l, self.cursor))
+			if (cb) cb()
+	  	}).catch(console.error)
+	}
 
-	, reset: so(function* () {
-	  	yield this.setInput('')
-	  	this.moveCursor(0)
+	, reset: function () {
+		const self = this
+	  	this.input = ''
+	  	this.complete(() => {
+		  	self.moveCursor(0)
+		  	self.render()
+	  	})
 	  	this.render()
-	})
+	}
 
 	, abort: function () {
 		this.done = this.aborted = true
@@ -50,15 +57,23 @@ const AutocompletePrompt = {
 
 
 
-	, _: so(function* (c) {
-	  	yield this.setInput(this.input + c)
-		this.render()
-	})
-	, delete: so(function* () {
+	, _: function (c) {
+		const self = this
+	  	this.input += c
+	  	this.complete(() => {
+			self.render()
+	  	})
+	  	this.render()
+	}
+	, delete: function () {
 		if (this.input.length === 0) return this.bell()
-	  	yield this.setInput(this.input.slice(0, -1))
+		const self = this
+	  	this.input = this.input.slice(0, -1)
+	  	this.complete(() => {
+	  		self.render()
+	  	})
 		this.render()
-	})
+	}
 
 
 
@@ -155,12 +170,7 @@ const autocompletePrompt = (msg, suggest, opt) => {
 	let p = Object.assign(Object.create(AutocompletePrompt), defaults, opt)
 	p.msg          = msg
 	p.suggest      = suggest
-	if (p.suggestions.length === 0) p.cursor = 0
-	else {
-		p.cursor = Math.min(p.suggestions.length - 1, p.cursor)
-		p.value = p.suggestions[p.cursor].value
-	}
-	p.setInput('').then(() => p.render())
+	p.complete(() => p.render())
 
 	return wrap(p)
 }
