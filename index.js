@@ -22,7 +22,7 @@ const AutocompletePrompt = {
 	  	const p = this.completing = this.suggest(this.input)
 	  	p.then((suggestions) => {
 	  		if (this.completing !== p) return
-	  		self.suggestions = suggestions
+	  		self.suggestions = suggestions.slice(0, self.limit)
 			this.completing = false
 			const l = Math.max(suggestions.length - 1, 0)
 			self.moveCursor(Math.min(l, self.cursor))
@@ -156,6 +156,7 @@ const defaults = {
 	, transform:   ui.render()
 
 	, suggestions: []
+	, limit:       10
 	, completing:  null
 	, cursor:      0
 	, value:       null
