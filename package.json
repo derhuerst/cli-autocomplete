@@ -1,7 +1,7 @@
 {
 	"name":              "cli-autocomplete",
 	"description":       "A command line prompt with autocompletion.",
-	"version":           "0.3.0",
+	"version":           "0.4.0",
 	"main":              "index.js",
 	"files":             ["index.js"],
 	"keywords":          ["command", "line", "cli", "prompt", "autocomplete", "completion", "prompt"],
