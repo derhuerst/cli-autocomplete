@@ -43,6 +43,16 @@ autocompletePrompt('What is your favorite color?', suggestColors)
 ```
 
 
+## Related
+
+- [`mail-prompt`](https://github.com/derhuerst/mail-prompt)
+- [`date-prompt`](https://github.com/derhuerst/date-prompt)
+- [`multiselect-prompt`](https://github.com/derhuerst/multiselect-prompt)
+- [`select-prompt`](https://github.com/derhuerst/select-prompt)
+- [`text-prompt`](https://github.com/derhuerst/text-prompt)
+- [`number-prompt`](https://github.com/derhuerst/number-prompt)
+
+
 ## Contributing
 
 If you **have a question**, **found a bug** or want to **propose a feature**, have a look at [the issues page](https://github.com/derhuerst/cli-autocomplete/issues).
