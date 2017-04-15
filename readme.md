@@ -9,6 +9,7 @@
 [![dependency status](https://img.shields.io/david/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=dependencies)
 [![dev dependency status](https://img.shields.io/david/dev/derhuerst/cli-autocomplete.svg)](https://david-dm.org/derhuerst/cli-autocomplete#info=devDependencies)
 ![ISC-licensed](https://img.shields.io/github/license/derhuerst/cli-autocomplete.svg)
+[![chat on gitter](https://badges.gitter.im/derhuerst.svg)](https://gitter.im/derhuerst)
 
 *cli-autocomplete* uses [*cli-styles*](https://github.com/derhuerst/cli-styles) and [*prompt-skeleton*](https://github.com/derhuerst/prompt-skeleton) to have a look & feel consistent with [other prompts](https://github.com/derhuerst/prompt-skeleton#prompts-using-prompt-skeleton).
 
@@ -45,12 +46,15 @@ autocompletePrompt('What is your favorite color?', suggestColors)
 
 ## Related
 
-- [`mail-prompt`](https://github.com/derhuerst/mail-prompt)
 - [`date-prompt`](https://github.com/derhuerst/date-prompt)
+- [`mail-prompt`](https://github.com/derhuerst/mail-prompt)
 - [`multiselect-prompt`](https://github.com/derhuerst/multiselect-prompt)
+- [`number-prompt`](https://github.com/derhuerst/number-prompt)
+- [`range-prompt`](https://github.com/derhuerst/range-prompt)
 - [`select-prompt`](https://github.com/derhuerst/select-prompt)
 - [`text-prompt`](https://github.com/derhuerst/text-prompt)
-- [`number-prompt`](https://github.com/derhuerst/number-prompt)
+- [`tree-select-prompt`](https://github.com/derhuerst/tree-select-prompt)
+- [`switch-prompt`](https://github.com/derhuerst/switch-prompt)
 
 
 ## Contributing
