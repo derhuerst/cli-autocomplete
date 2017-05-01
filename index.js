@@ -27,7 +27,9 @@ const AutocompletePrompt = {
 			const l = Math.max(suggestions.length - 1, 0)
 			self.moveCursor(Math.min(l, self.cursor))
 			if (cb) cb()
-	  	})
+	  	}).catch((err) => {
+			self.emit('error', err)
+		})
 	}
 
 	, reset: function () {
