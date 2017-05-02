@@ -22,10 +22,15 @@ const AutocompletePrompt = {
 	  	const p = this.completing = this.suggest(this.input)
 	  	p.then((suggestions) => {
 	  		if (this.completing !== p) return
-	  		self.suggestions = suggestions.slice(0, self.limit)
+
+	  		self.suggestions = suggestions
+	  			.slice(0, self.limit)
+	  			.map((s) => strip(s))
 			this.completing = false
+
 			const l = Math.max(suggestions.length - 1, 0)
 			self.moveCursor(Math.min(l, self.cursor))
+
 			if (cb) cb()
 	  	}).catch((err) => {
 			self.emit('error', err)
@@ -107,47 +112,27 @@ const AutocompletePrompt = {
 
 
 
-	, linesRendered: 0
-	, clear: function () {
-		const r = this.linesRendered
-		this.out.write(
-			// move to last rendered line
-			  (r > 0 ? esc.cursorDown(r) : '')
-			// move to first rendered line, deleting everything
-			+ esc.eraseLines(r + 1)
-		)
-	}
+	, lastRendered: ''
 
-	, renderPrompt: function () {return [
-		ui.symbol(this.done, this.aborted), this.msg,
-		ui.delimiter(this.completing),
-		this.done && (this.cursor in this.suggestions)
-			? this.suggestions[this.cursor].title
-			: this.transform(this.input)
-	].join(' ')}
+	, render: function () {
+		let prompt = [
+			ui.symbol(this.done, this.aborted),
+			this.msg,
+			ui.delimiter(this.completing),
+			this.done && this.suggestions[this.cursor]
+				? this.suggestions[this.cursor].title
+				: this.transform(this.input)
+		].join(' ')
 
-	, renderSuggestion: function (s, i) {
-		return i === this.cursor ? chalk.cyan(s.title) : s.title
-	}
-
-	, render: function (first) {
-		if (!first) this.clear()
-
-		const prompt = this.renderPrompt()
-		if (this.done) {
-			this.out.write(prompt)
-			this.linesRendered = 1
-		} else {
-			let out = [prompt].concat(this.suggestions
-				.map(this.renderSuggestion.bind(this)))
-			this.linesRendered = out.length
-
-			this.out.write(out.join('\n')
-				// move cursor back to first line
-				+ (out.length > 1 ? esc.cursorUp(out.length - 1) : '')
-				// move cursor to the end of the line
-				+ esc.cursorTo(strip(out[0]).length))
+		if (!this.done) {
+			for (let i = 0; i < this.suggestions.length; i++) {
+				const s = this.suggestions[i]
+				prompt += '\n' + (i === this.cursor ? chalk.cyan(s.title) : s.title)
+			}
 		}
+
+		this.out.write(ui.clear(this.lastRendered) + prompt)
+		this.lastRendered = prompt
 	}
 }
 
