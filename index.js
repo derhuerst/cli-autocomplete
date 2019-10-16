@@ -125,10 +125,12 @@ const AutocompletePrompt = {
 		].join(' ')
 
 		if (!this.done) {
+			prompt += esc.cursorSavePosition
 			for (let i = 0; i < this.suggestions.length; i++) {
 				const s = this.suggestions[i]
 				prompt += '\n' + (i === this.cursor ? chalk.cyan(s.title) : s.title)
 			}
+			prompt += esc.cursorRestorePosition
 		}
 
 		this.out.write(ui.clear(this.lastRendered) + prompt)
