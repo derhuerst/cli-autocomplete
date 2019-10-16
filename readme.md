@@ -1,6 +1,10 @@
 # cli-autocomplete
 
-**A command line prompt with autocompletion.** It provides just the ui, you are responsible for relevant completions.
+**Deprecated. Use the [autocomplete prompt](https://github.com/enquirer/enquirer#autocomplete-prompt) from [`enquirer`](https://github.com/enquirer/enquirer).**
+
+---
+
+A command line prompt with autocompletion. It provides just the ui, you are responsible for relevant completions.
 
 [![asciicast](https://asciinema.org/a/82643.png)](https://asciinema.org/a/82643)
 
@@ -49,12 +53,8 @@ autocompletePrompt('What is your favorite color?', suggestColors)
 - [`date-prompt`](https://github.com/derhuerst/date-prompt)
 - [`mail-prompt`](https://github.com/derhuerst/mail-prompt)
 - [`multiselect-prompt`](https://github.com/derhuerst/multiselect-prompt)
-- [`number-prompt`](https://github.com/derhuerst/number-prompt)
 - [`range-prompt`](https://github.com/derhuerst/range-prompt)
-- [`select-prompt`](https://github.com/derhuerst/select-prompt)
-- [`text-prompt`](https://github.com/derhuerst/text-prompt)
 - [`tree-select-prompt`](https://github.com/derhuerst/tree-select-prompt)
-- [`switch-prompt`](https://github.com/derhuerst/switch-prompt)
 
 
 ## Contributing
